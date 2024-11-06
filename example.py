@@ -1,6 +1,6 @@
 from Nets.NetScene import NetScene
-from Nets.BaseVar import Offset
-from Nets.BaseMixin import CommonStyleMixin
+from Nets.BaseVar import Offset, NodeVar, TextVar
+from Nets.BaseMixin import CommonStyleMixin, TextStyleMixin
 
 netS = NetScene(show_origin=True, figsize=6, titledict=dict(label='This is title!'))
 node1 = netS.addNode(Offset(5, 6), CommonStyleMixin(size=12, color='red', style='^'))
@@ -16,5 +16,13 @@ netS.addAttachText(line1, bias=-1, visible=0)
 netS.drawPathWithNodeAndText([Offset(-2, 2), Offset(-3, 3), Offset(-3, 6), Offset(0, 7), Offset(-0.5, 5.5)],
                              True, True, linestyle=CommonStyleMixin(color='cyan', size=2, style='-'))
 netS.drawPath([Offset(-13, -12), Offset(-13, -16), Offset(-17, -16)], closure=True)
+
+ts = TextStyleMixin.to()
+ts.rotation = 0
+netS.addTextNearNode(NodeVar(Offset(15, 15), netS.ax), "A",)
+netS.addTextNearNode(NodeVar(Offset(-15, -15), netS.ax), "A",)
+TextVar.bind(node1, "B", netS.ax)
+netS.addPtoPsWithNodeAndText(Offset(20, 20), [Offset(11, 28), Offset(15, 13), Offset(8, 15), Offset(18, 10)], arrow=True)
+
 
 netS.show()

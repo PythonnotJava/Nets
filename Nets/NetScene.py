@@ -177,19 +177,66 @@ class NetScene:
             ts.append(TextVar.length(ls[-1], self.ax, bias, textstyle, visible))
         return ns, ls, ts
 
-if __name__ == '__main__':
-    netS = NetScene(show_origin=True, figsize=6, titledict=dict(label='Network Ploty'))
-    netS.figure.tight_layout(pad=0)
-    node1 = netS.addNode(Offset(5, 6), CommonStyleMixin(size=12, color='red', style='^'))
-    netS.addNode(Offset(2, 6), node=node1)
-    netS.addLine(node1.pos, netS.Origin.pos, arrow=True)
-    netS.addLineBindNodes(Offset(3, 5), Offset(2, 2), True, isBind=True)
-    netS.addText(Offset(10, 10), "Hello World", rotation=45)
-    netS.addTextByConnectNodes(Offset(-3.5, -3.5), Offset(-6, -7.2),
-                               nodestyle=CommonStyleMixin(style='s', color='blue', size=10))
-    line1 = netS.addLine(Offset(-4, -5.5), Offset(-4.5, -6), isBind=True,
-                         style=CommonStyleMixin(style='--', color='grey', size=2))
-    netS.addAttachText(line1, bias=-1, visible=0)
-    netS.drawPathWithNodeAndText([Offset(-2, 2), Offset(-3, 3), Offset(-3, 6), Offset(0, 7), Offset(-0.5, 5.5)],
-                                 True, True, linestyle=CommonStyleMixin(color='cyan', size=2, style='-'))
-    netS.show()
+    # 11. 节点旁边指定文本
+    def addTextNearNode(
+            self,
+            node : NodeVar,
+            text : str,
+            theta: int = 0,
+            bias: Optional[float] = None,
+            style : TextStyleMixin = DefaultTextStyle
+    ) -> TextVar:
+        return TextVar.bind(node, text, self.ax, theta, bias, style)
+
+    # 12. 从某点出发到各点的路径图，返回线；也可以相当于某点出发偏移
+    def addPtoPs(
+            self,
+            pos : Offset,
+            points : Iterable[Offset],
+            arrow=False,
+            isBind=False,
+            style : CommonStyleMixin = DefaultLineStyle
+    ) -> List[LineVar]:
+        return [LineVar(pos, p, self.ax, arrow, style) for p in points] if isBind \
+            else [LineVar(pos, pos + p, self.ax, arrow, style) for p in points]
+
+    # 13. 从某点出发到各点的路径图，……，同时返回节点
+    def addPtoPsWithNode(
+            self,
+            pos: Offset,
+            points: Iterable[Offset],
+            arrow=False,
+            isBind=False,
+            linestyle: CommonStyleMixin = DefaultLineStyle,
+            nodestyle : CommonStyleMixin = DefaultNodeStyle
+    ) -> Tuple[List[LineVar], List[NodeVar]]:
+        ls = []
+        ns = []
+        if isBind:
+            for p in points:
+                ls.append(LineVar(pos, p, self.ax, arrow, linestyle))
+                ns.append(NodeVar(p, self.ax, nodestyle))
+            return ls, ns
+        for p in points:
+            off = p + pos
+            ls.append(LineVar(pos, off, self.ax, arrow, linestyle))
+            ns.append(NodeVar(off, self.ax, nodestyle))
+        return ls, ns
+
+    # 14. 从某点出发到各点的路径图，……，同时返回节点，以及文本，文本为空就显示距离
+    def addPtoPsWithNodeAndText(
+            self,
+            pos: Offset,
+            points: Iterable[Offset],
+            text : Optional[str] = None,
+            arrow=False,
+            isBind=False,
+            bias : Optional[float] = None,
+            linestyle: CommonStyleMixin = DefaultLineStyle,
+            nodestyle : CommonStyleMixin = DefaultNodeStyle,
+            textstyle : TextStyleMixin = DefaultTextStyle,
+            visible : int = 0
+    ) -> Tuple[List[LineVar], List[NodeVar], List[TextVar]]:
+        ls, ns = self.addPtoPsWithNode(pos, points, arrow, isBind, linestyle, nodestyle)
+        return (ls, ns, [TextVar.parallel(line, text, self.ax, bias, textstyle) for line in ls]
+        if text else [TextVar.length(line, self.ax, bias, textstyle, visible) for line in ls])

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
-from typing import Optional, Self, Iterable, List, overload
-from math import sqrt, cos, sin, degrees, atan2
+from typing import Optional, Self, Iterable, List, overload, Union
+from math import sqrt, cos, sin, degrees, atan2, radians
 
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
@@ -13,9 +13,19 @@ class Offset(object):
     x: float
     y: float
 
-    def __add__(self, other: Self) -> Self: return Offset(self.x + other.x, other.y + self.y)
+    @overload
+    def __add__(self, other: Self) -> Self: ...
+    @overload
+    def __add__(self, other : float) -> Self: ...
+    def __add__(self, other : Union[Self, float]) -> Self:
+        return Offset(self.x + other.x, other.y + self.y) if isinstance(other, Offset) else Offset(self.x + other, other + self.y)
 
-    def __sub__(self, other: Self) -> Self: return Offset(self.x - other.x, self.y - other.y)
+    @overload
+    def __sub__(self, other: Self) -> Self: ...
+    @overload
+    def __sub__(self, other: float) -> Self: ...
+    def __sub__(self, other : Union[Self, float]) -> Self:
+        return Offset(self.x - other.x, self.y - other.y) if isinstance(other, Offset) else Offset(self.x - other, self.y - other)
 
 # 节点类
 class NodeVar(object):
@@ -36,10 +46,10 @@ class NodeVar(object):
     def Y(self) -> float: return self.pos.y
 
     # 绑定一个相对点的长度夹角构造方式
-    # 规定：theta是度数值，不是弧度，且范围是0 ~ 360
     @classmethod
     def bind(cls, node: Self, length: float, theta: float, ax: Axes,
              style: CommonStyleMixin = DefaultNodeStyle) -> Self:
+        theta = radians(theta)
         pos = Offset(x=node.X() + length * cos(theta), y=node.Y() + length * sin(theta))
         return cls(pos=pos, ax=ax, style=style)
 
@@ -82,7 +92,10 @@ class LineVar(object):
 
 # 文本类
 """
-文本布置最大的bug在于如果初始画布不是n*n尺寸，会导致直线不与文本平行的问题;
+设计规定：
+1. 我们传入的一切角度都是自然直观的度数，不是弧度，范围是0 ~ 360
+2. 在进行一个文本布置的时候，bias控制文本偏移目标距离、其内置属性rotation控制文本相当于目标位置的角度
+注：文本布置最大的bug在于如果初始画布不是n*n尺寸，会导致直线不与文本平行的问题;
 另外，即使初始平行，任意缩放尺寸也会造成平行丢失，办法就是重写resize画布事件.
 我不写，只声明
 """
@@ -90,6 +103,9 @@ class TextVar(object):
     # 从某点开始布置文本
     def __init__(self, pos: Offset, text: str, ax: Axes, style: TextStyleMixin = DefaultTextStyle):
         StyleAnalyze('text', style)
+        # Bug Here：当使用默认的时候，应该是0°的文本方向，但是自动会变，特地修正
+        if style == DefaultTextStyle:
+            style.rotation = 0
         self.pos = pos
         self.text = text
         self.style = style
@@ -113,7 +129,6 @@ class TextVar(object):
         return cls(pos, text, ax, style)
 
     # 显示两点之间的距离(distance) | 显示直线长度(length)。这两个方法都是主动平行于所在直线的
-    # 偏移不指定就取第一个（点大小 + 字体大小）* 0.025
     @classmethod
     def distance(cls,
                  node1: NodeVar,
@@ -123,7 +138,7 @@ class TextVar(object):
                  style: TextStyleMixin = DefaultTextStyle,
                  visible: int = 0
                  ) -> Self:
-        gap: float = bias if bias else (node1.style.size + style.size) * 0.025
+        gap: float = bias if bias else (node1.style.size + style.size) * 0.05
         theta = degrees(atan2(node2.Y() - node1.Y(), node2.X() - node1.X()))
         X = (node1.X() + node2.X()) / 2
         Y = (node2.Y() + node1.Y()) / 2 + gap
@@ -150,6 +165,23 @@ class TextVar(object):
         style.rotation = theta
         text = f'{line.length:.{visible}f}'
         return cls(pos, text, ax, style)
+
+    # 在节点旁边添加文本
+    # theta是文本相当于目标位置的夹角
+    @classmethod
+    def bind(
+            cls,
+            node : NodeVar,
+            text : str,
+            ax: Axes,
+            theta : int = 0,
+            bias: Optional[float] = None,
+            style : TextStyleMixin = DefaultTextStyle
+    ) -> Self:
+        # print(style.rotation)
+        gap: float = bias if bias else (node.style.size + style.size) * 0.05
+        t = radians(theta)
+        return cls(node.pos + Offset(gap * cos(t), gap * sin(t)), text, ax, style)
 
 # 将相对于原点的位置列表转为Offset | 另一个版本是相对于是上一个进行偏移，第一个相对于原点
 @overload
