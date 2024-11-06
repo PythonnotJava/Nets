@@ -8,9 +8,9 @@ class CommonStyleMixin(object):
     """
     各个属性分别从节点类、线类、文本类展开说明
     1. style
-        - 可取圆形、矩形、三角形 | o、s、^
-        - 可取实线、虚线、点线、点划线 | -、--、:、—.
-        - 可取正常字体、斜体 | normal、italic
+        - 可取圆形、矩形、三角形 | o、s、^等
+        - 可取实线、虚线、点线、点划线 | -、--、:、—.等
+        - 可取正常字体、斜体 | normal、italic等
     2. size
         - 表示点的大小
         - 表示线粗
@@ -35,6 +35,8 @@ class CommonStyleMixin(object):
     def __str__(self):
         return f"style : {self.style}\nsize : {self.size}\ncolor : {self.color}"
 
+    def __eq__(self, other : Self) -> bool:
+        return self.style == other.style and self.size == self.size and self.color == other.color
 
 # 文本的额外配置
 class TextStyleMixin(CommonStyleMixin):
@@ -44,6 +46,13 @@ class TextStyleMixin(CommonStyleMixin):
     """
     family: str = 'Microsoft YaHei'
     rotation: int = 0
+    def __init__(self, family: str = 'Microsoft YaHei', rotation: int = 0, **kwargs):
+        super().__init__(**kwargs)
+        self.family = family
+        self.rotation = rotation
+
+    def __eq__(self, other : Self) -> bool:
+        return self.family == other.family and self.rotation == other.rotation and super().__eq__(other)
 
     @classmethod
     def to(cls, **kwargs) -> Self:

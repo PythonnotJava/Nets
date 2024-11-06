@@ -2,27 +2,35 @@ from Nets.NetScene import NetScene
 from Nets.BaseVar import Offset, NodeVar, TextVar
 from Nets.BaseMixin import CommonStyleMixin, TextStyleMixin
 
-netS = NetScene(show_origin=True, figsize=6, titledict=dict(label='This is title!'))
-node1 = netS.addNode(Offset(5, 6), CommonStyleMixin(size=12, color='red', style='^'))
-netS.addNode(Offset(2, 6), node=node1)
-netS.addLine(node1.pos, netS.Origin.pos, arrow=True)
-netS.addLineBindNodes(Offset(3, 5), Offset(2, 2), True, isBind=True)
-netS.addText(Offset(10, 10), "Hello World", rotation=45)
-netS.addTextByConnectNodes(Offset(-3.5, -3.5), Offset(-6, -7.2),
-                           nodestyle=CommonStyleMixin(style='s', color='blue', size=10))
-line1 = netS.addLine(Offset(-4, -5.5), Offset(-4.5, -6), isBind=True,
-                     style=CommonStyleMixin(style='--', color='grey', size=2))
-netS.addAttachText(line1, bias=-1, visible=0)
-netS.drawPathWithNodeAndText([Offset(-2, 2), Offset(-3, 3), Offset(-3, 6), Offset(0, 7), Offset(-0.5, 5.5)],
-                             True, True, linestyle=CommonStyleMixin(color='cyan', size=2, style='-'))
-netS.drawPath([Offset(-13, -12), Offset(-13, -16), Offset(-17, -16)], closure=True)
+netS = NetScene(show_origin=True, titledict=dict(label='Nets Example'), figsize=6)
+ns1, _, _ = netS.addBindsToAll(
+    Offset(0, 0),
+    distances_thetas={
+        4 : 60,
+        3.7 : 280,
+        3.4 : 225
+    },
+    closure=True,
+    closureText='3.5',
+    bias=0,
+    parallel=True
+)
 
-ts = TextStyleMixin.to()
-ts.rotation = 0
-netS.addTextNearNode(NodeVar(Offset(15, 15), netS.ax), "A",)
-netS.addTextNearNode(NodeVar(Offset(-15, -15), netS.ax), "A",)
-TextVar.bind(node1, "B", netS.ax)
-netS.addPtoPsWithNodeAndText(Offset(20, 20), [Offset(11, 28), Offset(15, 13), Offset(8, 15), Offset(18, 10)], arrow=True)
+A, B, C, D = ns1
+ns2, _, _ = netS.addBindsToAll(
+    A,
+    distances_thetas={
+        6.2 : 145,
+        7.2 : 220,
+        7 : 335
+    },
+    parallel=True,
+    closure=True,
+    closureText='3.5',
+    bias=0
+)
 
-
+netS.save('example')
 netS.show()
+
+
