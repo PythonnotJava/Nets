@@ -1,3 +1,31 @@
+Metadata-Version: 2.1
+Name: Nets
+Version: 0.1.0
+Summary: Nets is a visualization library for drawing network graphs, based on matplotlib.
+Home-page: https://github.com/PythonnotJava/Nets
+Author: PythonnotJava
+Author-email: 2565497078@qq.com
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.12
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: matplotlib
+
+# Nets
+Nets is a visualization library for drawing network graphs, based on matplotlib
+
+## 计划开发
+- 样图（长度可能是假的，只是为了呈现图像效果）
+- 实际比例图（遵循严格的计算，按比例缩放到图中）
+
+# 注意事项
+- Nets的图元布置时，某些图元可以获取在画布上相对与另一图元的真实长度；但同时也可以在场景有限的前提下，随意设置长度，特地提醒
+- 图元所有具备的属性，都是真实数据
+
+# 测试案例
+```python
 from Nets.NetScene import NetScene
 from Nets.BaseVar import Offset, NodeVar
 from Nets.BaseMixin import TextStyleMixin
@@ -106,3 +134,6 @@ netS.save('example')
 netS.show()
 
 
+```
+
+![img](example.png)
