@@ -9,4 +9,4 @@ Nets is a visualization library for drawing network graphs, based on matplotlib
 ![img](example.png)
 
 # 注意事项
-- Nets的图元布置时，某些图元可以获取在画布上相对与另一图元的真实长度；但同时也可以在场景有限的前提下，随意设置长度，因此希望避免二者同时使用
+- Nets的图元布置时，某些图元可以获取在画布上相对与另一图元的真实长度；但同时也可以在场景有限的前提下，随意设置长度，特地提醒

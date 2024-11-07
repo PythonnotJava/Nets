@@ -13,7 +13,8 @@ ns1, _, _ = netS.addBindsToAll(
     closure=True,
     closureText='3.5',
     bias=0,
-    parallel=True
+    textstyle=TextStyleMixin(style='normal', size=12, color='r', rotation=0)
+    # parallel=True
 )
 
 A, B, C, D = ns1

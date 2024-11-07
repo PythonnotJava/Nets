@@ -255,6 +255,7 @@ class NetScene:
         self.figure.savefig(f"{fileName}.{format}", **kwargs)
 
     # 17. 根据偏移的距离和夹角绘制所有图元，下一个的节点是相对于上一个节点的
+    # 在选择闭合的同时，如果为了避免精确计算闭合线长度而不是自己期待的长度，可以使用closureText传入指定文本替换
     def addBindsToAll(
             self,
             pos : Union[Offset, NodeVar],
